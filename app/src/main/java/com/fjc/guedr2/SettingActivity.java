@@ -53,6 +53,7 @@ public class SettingActivity extends AppCompatActivity {
 
         setResult(RESULT_OK, returnIntent);
 
+        //Es necesario para que viaje el intent y pare la actividad
         finish();
     }
 }
