@@ -11,6 +11,7 @@ import android.widget.RadioGroup;
  */
 public class SettingActivity extends AppCompatActivity {
 
+
     private RadioGroup mRadioGroup;
 
     @Override
@@ -43,7 +44,11 @@ public class SettingActivity extends AppCompatActivity {
     }
 
     private void acceptSettings() {
+
+        //Tengo que devolver a la pantalla principal lo que ha selecionado el usuario
         Intent returnIntent = new Intent();
+
+        //putExtra para pasar datos a un intent (clave = units // valor = mRadioGroup.getCheckedRadioButtonId())
         returnIntent.putExtra("units", mRadioGroup.getCheckedRadioButtonId());
 
         setResult(RESULT_OK, returnIntent);

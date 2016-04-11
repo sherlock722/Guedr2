@@ -11,6 +11,8 @@ import android.widget.TextView;
 
 public class ForecastActivity extends AppCompatActivity {
 
+    private static final int REQUEST_UNIT = 1;
+
     private TextView mMax_temp;
     private TextView mMin_temp;
     private TextView mHumidity;
@@ -69,8 +71,11 @@ public class ForecastActivity extends AppCompatActivity {
             //ya que decimos que actividad explicitamente se tiene que lanzar
             Intent intent = new Intent(this,SettingActivity.class);
 
-            //Lanzamos el intent explicito para lanzar la pantalla de ajustes
-            startActivity(intent);
+            //Lanzamos el intent explicito para lanzar la pantalla de ajustes (sin recibir parametros)
+            //startActivity(intent);
+
+            //Lanzamos el intent recogiendo los parametros que me manda la pantalla de ajustes
+            startActivityForResult(intent,REQUEST_UNIT);
             return true;
         }
 
