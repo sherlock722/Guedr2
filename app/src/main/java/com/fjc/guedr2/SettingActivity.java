@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 /**
@@ -11,6 +12,7 @@ import android.widget.RadioGroup;
  */
 public class SettingActivity extends AppCompatActivity {
 
+    public static final String EXTRA_CURRENT_UNIT = "extra_current_ubnit";
 
     private RadioGroup mRadioGroup;
 
@@ -35,6 +37,18 @@ public class SettingActivity extends AppCompatActivity {
                 cancelSettings();
             }
         });
+
+        //Se recupera la infornmación de los parametros que nos envia la primera pantalla
+        boolean showCelsius = getIntent().getBooleanExtra(EXTRA_CURRENT_UNIT,true); //Se asigna un valor por defecto si no nos pasa nada la primera actividad
+
+        //En funcion de los que nos envie marcamos uno u otro radio button
+        if (showCelsius){
+            RadioButton celsiusRadius = (RadioButton) findViewById(R.id.celsius_rb);
+            celsiusRadius.setChecked(true);
+        } else{
+            RadioButton farenhaidRadius = (RadioButton) findViewById(R.id.farenheit_rb);
+            farenhaidRadius.setChecked(true);
+        }
 
     }
 

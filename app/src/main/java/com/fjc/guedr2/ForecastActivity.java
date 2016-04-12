@@ -1,6 +1,8 @@
 package com.fjc.guedr2;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,6 +22,10 @@ public class ForecastActivity extends AppCompatActivity {
     private TextView mDescription;
     private ImageView mForecast_image;
     private boolean showCelsius;
+    private Forecast mForecast;
+
+    //Para persistir datos
+    private static final String PREFERENCE_UNITS="units";
 
 
     @Override
@@ -35,10 +41,16 @@ public class ForecastActivity extends AppCompatActivity {
          mForecast_image = (ImageView) findViewById(R.id.forecast_img);
 
         //Valor por defecto para showCelsius;
-        showCelsius = true;
+        //showCelsius = true;
+
+        //Recuperamos los valores almacenados
+        showCelsius = PreferenceManager.getDefaultSharedPreferences(this).
+                getBoolean(PREFERENCE_UNITS, true); //Se asigna true como valor por defecto si inicialmente no tienen valor
+
 
         //Creo el modelo
-        Forecast forecast = new Forecast(24,10,25,"Sol y nubes", R.drawable.sun_cloud);
+        //Forecast forecast = new Forecast(24,10,25,"Sol y nubes", R.drawable.sun_cloud);
+        mForecast = new Forecast(24,10,25,"Sol y nubes", R.drawable.sun_cloud);
 
          /*
          //mMax_temp.setText(String.valueOf(forecast.getMaxTemp()));
@@ -49,7 +61,8 @@ public class ForecastActivity extends AppCompatActivity {
         //Para el icono utilizamos un método que nos devuelve un recurso
         mForecast_image.setImageResource(forecast.getIcon());*/
 
-        setForecast(forecast);
+        //setForecast(forecast);
+        setForecast(mForecast);
 
     }
 
@@ -76,6 +89,9 @@ public class ForecastActivity extends AppCompatActivity {
             //Lanzamos la actividad SettingsActivity utilizando un intent explicito
             //ya que decimos que actividad explicitamente se tiene que lanzar
             Intent intent = new Intent(this,SettingActivity.class);
+
+            //Pasamos parametros a la segunda pantalla
+            intent.putExtra(SettingActivity.EXTRA_CURRENT_UNIT,showCelsius);
 
             //Lanzamos el intent explicito para lanzar la pantalla de ajustes (sin recibir parametros)
             //startActivity(intent);
@@ -109,6 +125,24 @@ public class ForecastActivity extends AppCompatActivity {
                     showCelsius = false;
 
                 }
+                /*
+                //1-Persistimos las preferencias
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+                //2-Entramos en modo Edicion
+                SharedPreferences.Editor editor = prefs.edit();
+                //3-Guardamos los datos
+                editor.putBoolean(PREFERENCE_UNITS, showCelsius);
+                //4-Se hace commit
+                editor.commit();
+                */
+                //La otra manera de hacer lo anterior sería
+                PreferenceManager.getDefaultSharedPreferences(this)
+                        .edit()
+                        .putBoolean(PREFERENCE_UNITS, showCelsius)
+                        .commit();
+
+                //Actualizamos el módelo
+                setForecast(mForecast);
             }
         }
     }
