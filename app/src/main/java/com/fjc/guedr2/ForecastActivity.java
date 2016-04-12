@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -113,6 +114,10 @@ public class ForecastActivity extends AppCompatActivity {
         if (requestCode == REQUEST_UNIT){
             //Vengo de la pantalla de ajustes
             if (resultCode == RESULT_OK){
+
+                //Guardamos el valor previo de showCelsius por si el usuario quiere deshacer
+                final boolean oldShowCelsius = showCelsius;
+
                 //El usuario ha seleccionado algo y la información vienen en data
                 int  optionSelected = data.getIntExtra("units",R.id.celsius_rb); //clave a recuperar el valor ó valor por defecto
                 if (optionSelected == R.id.celsius_rb){
@@ -150,7 +155,24 @@ public class ForecastActivity extends AppCompatActivity {
                 //Toast.makeText(this,"Cambios Realizados",Toast.LENGTH_LONG).show();
 
                 //Avisamos al usuario utilizando SnackBar
-                Snackbar.make(findViewById(android.R.id.content),"Preferencias Actualizadas", Snackbar.LENGTH_LONG).show();
+                Snackbar.make(findViewById(android.R.id.content),"Preferencias Actualizadas", Snackbar.LENGTH_LONG)
+                        .setAction("Deshacer", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                                //Restauramos la variable showCelsius
+                                showCelsius = oldShowCelsius;
+
+                                //Guardamos el valor anterior en las preferencias
+                                PreferenceManager.getDefaultSharedPreferences(ForecastActivity.this)
+                                        .edit()
+                                        .putBoolean(PREFERENCE_UNITS, showCelsius)
+                                        .commit();
+                                //Actualizamos la interfaz(modelo)
+                                setForecast(mForecast);
+                            }
+                        })
+                        .show();
             }
         }
     }
