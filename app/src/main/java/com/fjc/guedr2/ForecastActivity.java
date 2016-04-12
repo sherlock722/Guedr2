@@ -3,6 +3,7 @@ package com.fjc.guedr2;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class ForecastActivity extends AppCompatActivity {
 
@@ -143,6 +145,12 @@ public class ForecastActivity extends AppCompatActivity {
 
                 //Actualizamos el módelo
                 setForecast(mForecast);
+
+                //Avisamos al usuario de los cambios en las preferencias (Toast)
+                //Toast.makeText(this,"Cambios Realizados",Toast.LENGTH_LONG).show();
+
+                //Avisamos al usuario utilizando SnackBar
+                Snackbar.make(findViewById(android.R.id.content),"Preferencias Actualizadas", Snackbar.LENGTH_LONG).show();
             }
         }
     }
