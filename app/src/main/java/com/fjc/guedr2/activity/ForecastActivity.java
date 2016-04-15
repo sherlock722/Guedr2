@@ -1,29 +1,20 @@
-package com.fjc.guedr2;
+package com.fjc.guedr2.activity;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.content.Intent;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.support.v7.app.AppCompatActivity;
 
-/**
- * Created by javier on 14/4/16.
- */
-public class FragmentForecast extends Fragment {
+import com.fjc.guedr2.R;
+
+public class ForecastActivity extends AppCompatActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_forecast);
+    }
+
 
     //Para saber de que pantalla vengo (este se utiliza para la pantalla de ajustes)
-    private static final int REQUEST_UNIT = 1;
+    /*private static final int REQUEST_UNIT = 1;
 
     private TextView mMax_temp;
     private TextView mMin_temp;
@@ -34,37 +25,29 @@ public class FragmentForecast extends Fragment {
     private Forecast mForecast;
 
     //Para persistir datos
-    private static final String PREFERENCE_UNITS="units";
+    private static final String PREFERENCE_UNITS="units";*/
 
-
-    @Nullable
-    @Override
-
-    //Este metodo necesita devolver la Vista Raiz despues de crerar el fragment
-    //Las actividades llaman a los onCreateView de los fragment y los fragments devuelve la vista
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        super.onCreateView(inflater, container, savedInstanceState);
-        //Devuelvo la vista del fragment
-        //Paso el container (de donde cuelga)
-        //Paso false
-        View root = inflater.inflate(R.layout.fragment_forecast, container,false);
+/*
+    //Esto era el onCreate de la Actividad ForecastActivity
+    //@Override
+    protected void onCreate(Bundle savedInstanceState) {
+        //super.onCreate(savedInstanceState);
+        //setContentView(R.layout.fragment_forecast);
 
         //Recuperar un valor del fichero integer
         //Log.v("INTEGER", "EL resultado es: " + getResources().getInteger(R.integer.sherlock722));
 
-
-        //En la vista raiz (root) tengo acceso al método findViewById
-        mMax_temp = (TextView) root.findViewById(R.id.max_temp);
-        mMin_temp = (TextView) root.findViewById(R.id.min_temp);
-        mHumidity = (TextView) root.findViewById(R.id.humidity);
-        mDescription = (TextView) root.findViewById(R.id.description_forecast);
-        mForecast_image = (ImageView) root.findViewById(R.id.forecast_img);
+        mMax_temp = (TextView) findViewById(R.id.max_temp);
+        mMin_temp = (TextView) findViewById(R.id.min_temp);
+        mHumidity = (TextView) findViewById(R.id.humidity);
+        mDescription = (TextView) findViewById(R.id.description_forecast);
+        mForecast_image = (ImageView) findViewById(R.id.forecast_img);
 
         //Valor por defecto para showCelsius;
         //showCelsius = true;
 
         //Recuperamos los valores almacenados
-        showCelsius = PreferenceManager.getDefaultSharedPreferences(getActivity()).
+        showCelsius = PreferenceManager.getDefaultSharedPreferences(this).
                 getBoolean(PREFERENCE_UNITS, true); //Se asigna true como valor por defecto si inicialmente no tienen valor
 
 
@@ -72,29 +55,35 @@ public class FragmentForecast extends Fragment {
         //Forecast forecast = new Forecast(24,10,25,"Sol y nubes", R.drawable.sun_cloud);
         mForecast = new Forecast(24,10,25,"Sol y nubes", R.drawable.sun_cloud);
 
-        setForecast(mForecast);
 
-        return root;
-    }
+         //mMax_temp.setText(String.valueOf(forecast.getMaxTemp()));
+        //mMax_temp.setText(String.format("Temperatura máxima: %.2f", forecast.getMaxTemp()));
+        //mMin_temp.setText(String.format("Temperatura mínima: %.2f", forecast.getMinTemp()));
+        //mHumidity.setText(String.format("Humedad: %.2f", forecast.getHumidity()));
+        //mDescription.setText(forecast.getDescription());
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        //Para el icono utilizamos un método que nos devuelve un recurso
+        //mForecast_image.setImageResource(forecast.getIcon());
 
-        //Tengo menu (llama a los métodos que crean los menus)
-        setHasOptionsMenu(true);
-    }
+
+    //setForecast(forecast);
+    setForecast(mForecast);
+    }*/
 
     //Indica como es el Menu
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    /*@Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
         //Llamo al método del padre
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_forecast, menu);
-    }
+        super.onCreateOptionsMenu(menu);
+        //Para el Menu
+        getMenuInflater().inflate(R.menu.menu_forecast, menu);
+        //return super.onCreateOptionsMenu(menu);
+        return true; //Se han realizado modificaciones
+    }*/
 
     //Indica que pasa al pulsar una opción de Menú
-    @Override
+    /*@Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         boolean superReturn = super.onOptionsItemSelected(item);
@@ -103,7 +92,7 @@ public class FragmentForecast extends Fragment {
 
             //Lanzamos la actividad SettingsActivity utilizando un intent explicito
             //ya que decimos que actividad explicitamente se tiene que lanzar
-            Intent intent = new Intent(getActivity(),SettingActivity.class);
+            Intent intent = new Intent(this,SettingActivity.class);
 
             //Pasamos parametros a la segunda pantalla
             intent.putExtra(SettingActivity.EXTRA_CURRENT_UNIT,showCelsius);
@@ -117,16 +106,14 @@ public class FragmentForecast extends Fragment {
         }
 
         return superReturn;
-    }
-
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    }*/
+    /*@Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_UNIT){
             //Vengo de la pantalla de ajustes
-            if (resultCode == Activity.RESULT_OK){
+            if (resultCode == RESULT_OK){
 
                 //Guardamos el valor previo de showCelsius por si el usuario quiere deshacer
                 final boolean oldShowCelsius = showCelsius;
@@ -145,18 +132,18 @@ public class FragmentForecast extends Fragment {
                     showCelsius = false;
 
                 }
-                /*
+
                 //1-Persistimos las preferencias
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+                //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
                 //2-Entramos en modo Edicion
-                SharedPreferences.Editor editor = prefs.edit();
+                //SharedPreferences.Editor editor = prefs.edit();
                 //3-Guardamos los datos
-                editor.putBoolean(PREFERENCE_UNITS, showCelsius);
+                //editor.putBoolean(PREFERENCE_UNITS, showCelsius);
                 //4-Se hace commit
-                editor.commit();
-                */
+                //editor.commit();
+
                 //La otra manera de hacer lo anterior sería
-                PreferenceManager.getDefaultSharedPreferences(getActivity())
+                PreferenceManager.getDefaultSharedPreferences(this)
                         .edit()
                         .putBoolean(PREFERENCE_UNITS, showCelsius)
                         .commit();
@@ -168,8 +155,7 @@ public class FragmentForecast extends Fragment {
                 //Toast.makeText(this,"Cambios Realizados",Toast.LENGTH_LONG).show();
 
                 //Avisamos al usuario utilizando SnackBar
-                //Me guardo la referencia de la vista o decirle al SnackBar que se ponga delante del View
-                Snackbar.make(getView(), "Preferencias Actualizadas", Snackbar.LENGTH_LONG)
+                Snackbar.make(findViewById(android.R.id.content), "Preferencias Actualizadas", Snackbar.LENGTH_LONG)
                         .setAction("Deshacer", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -178,7 +164,7 @@ public class FragmentForecast extends Fragment {
                                 showCelsius = oldShowCelsius;
 
                                 //Guardamos el valor anterior en las preferencias
-                                PreferenceManager.getDefaultSharedPreferences(getActivity())
+                                PreferenceManager.getDefaultSharedPreferences(ForecastActivity.this)
                                         .edit()
                                         .putBoolean(PREFERENCE_UNITS, showCelsius)
                                         .commit();
@@ -189,9 +175,9 @@ public class FragmentForecast extends Fragment {
                         .show();
             }
         }
-    }
+    }*/
 
-    public void setForecast (Forecast forecast){
+    /*public void setForecast (Forecast forecast){
 
         float maxTemp = forecast.getMaxTemp();
         float minTemp = forecast.getMinTemp();
@@ -213,10 +199,12 @@ public class FragmentForecast extends Fragment {
         mForecast_image.setImageResource(forecast.getIcon());
 
 
-    }
+    }*/
 
-    public static float atFarnheid (Float celsius){
+    /*public static float atFarnheid (Float celsius){
 
         return (celsius * 1.8f) + 32;
-    }
+    }*/
+
+
 }

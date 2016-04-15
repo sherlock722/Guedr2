@@ -1,4 +1,4 @@
-package com.fjc.guedr2;
+package com.fjc.guedr2.model;
 
 /**
  * Created by javier on 10/4/16.

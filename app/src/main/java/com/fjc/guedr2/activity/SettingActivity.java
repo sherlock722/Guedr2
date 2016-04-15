@@ -1,4 +1,4 @@
-package com.fjc.guedr2;
+package com.fjc.guedr2.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+
+import com.fjc.guedr2.R;
 
 /**
  * Created by javier on 11/4/16.
