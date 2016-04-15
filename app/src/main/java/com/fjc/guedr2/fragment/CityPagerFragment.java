@@ -1,11 +1,14 @@
 package com.fjc.guedr2.fragment;
 
 
+
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +23,8 @@ import com.fjc.guedr2.model.City;
  */
 public class CityPagerFragment extends Fragment {
 
+    private Cities mCities;
+
     public CityPagerFragment() {
         // Required empty public constructor
 
@@ -30,6 +35,9 @@ public class CityPagerFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_city_pager, container, false);
+
+        //Recupero el modelo
+        mCities = new Cities();
 
         //Accedemos al ViewPager de nuestra interfaz
         ViewPager pager = (ViewPager) root.findViewById(R.id.view_pager);
@@ -42,8 +50,47 @@ public class CityPagerFragment extends Fragment {
         //Le decimos al ViewPager quien es su adaptador que le dará los fragment que debe dibujar
         pager.setAdapter(new CityPagerAdapter(getFragmentManager()));
 
+        //Me entero cuando el usuario cambia de pagina en el ViewPager
 
+        pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+              @Override
+              public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+               }
+
+                //Aqui es donde el usuario ha cambiado de página
+                @Override
+                public void onPageSelected(int position) {
+
+                    updateCityInfo(position);
+
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+
+                }
+               }
+        );
+
+        updateCityInfo(0);
         return root;
+    }
+    public void updateCityInfo (int position){
+        //Modificamos el título de la Toolbar.
+        //Para ello necesitamos:
+
+        //1) Acceder a la actividad que nos contiene
+        if (getActivity() instanceof AppCompatActivity) {
+            AppCompatActivity activity = (AppCompatActivity) getActivity();
+
+            //2)Acceder dentro de la actividad a la ActionBar
+            ActionBar actionBar = activity.getSupportActionBar();
+
+            //3) Cambiar el texto a la ToolBar
+            actionBar.setTitle(mCities.getCities().get (position).getnName());
+        }
+
     }
 
 }

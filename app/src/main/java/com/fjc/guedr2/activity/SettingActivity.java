@@ -3,6 +3,7 @@ package com.fjc.guedr2.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -25,6 +26,12 @@ public class SettingActivity extends AppCompatActivity {
 
         // Accedo a las vistas
         mRadioGroup = (RadioGroup) findViewById(R.id.units_rg);
+
+        //ToolBar
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        //Le decimos a nuestra actividad que queremos usar esa vista toolbar como nuestra ToolBar
+        setSupportActionBar(toolbar);
 
         findViewById(R.id.accept_btn).setOnClickListener(new View.OnClickListener() {
             @Override
