@@ -92,5 +92,10 @@ class CityPagerAdapter extends FragmentPagerAdapter { //v.13 support //FragmentP
         return mCities.getCities().size();
     }
 
-
+    //Metodo para pintar el titulo de cada ViewPager
+    @Override
+    public CharSequence getPageTitle(int position) {
+         super.getPageTitle(position);
+        return mCities.getCities().get(position).getnName();
+    }
 }
