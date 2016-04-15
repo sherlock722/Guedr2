@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 
 import com.fjc.guedr2.R;
 import com.fjc.guedr2.model.Cities;
+import com.fjc.guedr2.model.City;
 
 
 /**
@@ -23,7 +24,6 @@ public class CityPagerFragment extends Fragment {
         // Required empty public constructor
 
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -58,23 +58,30 @@ class CityPagerAdapter extends FragmentPagerAdapter { //v.13 support //FragmentP
         mCities=new Cities();
 
     }
-
     //Que fragment va en una determinada posición
     @Override
     public android.app.Fragment getItem(int position) {
 
-        //Vamos a pasar parametros al fragment a partir de argumentos
-        String cityName = mCities.getCities().get(position).getnName();
+        //Vamos a pasar parametros al fragment a partir de argumentos (bundle)
+        //String cityName = mCities.getCities().get(position).getnName();
+        City city = mCities.getCities().get (position);
 
-        FragmentForecast fragment = new FragmentForecast();
+        /*FragmentForecast fragment = new FragmentForecast();
 
         Bundle arguments = new Bundle();
-        arguments.getString("cityName", cityName);
-        fragment.setArguments(arguments);
+        arguments.putString(FragmentForecast.ARG_CITY_NAME, cityName);
+        fragment.setArguments(arguments);*/
+
+        //Esto es otra formas de hacer lo de justo encima (pasamos el nombre de la ciudad)
+        //FragmentForecast fragment = FragmentForecast.newInstance(cityName);
+
+        //Ahora pasamos la ciudad completa
+        FragmentForecast fragment = FragmentForecast.newInstance(city);
 
 
         /* Necesito un fragment que devuelva el FragmentForecast */
-        return new FragmentForecast();
+        //return new FragmentForecast();
+        return fragment;
     }
 
     //Número de partes en el ViewPAger

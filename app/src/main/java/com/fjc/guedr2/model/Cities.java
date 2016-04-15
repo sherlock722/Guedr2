@@ -7,7 +7,7 @@ import java.util.LinkedList;
 /**
  * Created by javier on 15/4/16.
  */
-public class Cities  {
+public class Cities {
 
     private LinkedList<City> mCities;
 

@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.fjc.guedr2.activity.SettingActivity;
+import com.fjc.guedr2.model.City;
 import com.fjc.guedr2.model.Forecast;
 import com.fjc.guedr2.R;
 
@@ -37,10 +38,29 @@ public class FragmentForecast extends Fragment {
     private boolean showCelsius;
     private Forecast mForecast;
     private TextView mCityName;
+    private City mCity;
+
 
     //Para persistir datos
     private static final String PREFERENCE_UNITS="units";
+    public static final String ARG_CITY_NAME="cityName";
 
+    public static final String ARG_CITY="city";
+
+
+    //public static FragmentForecast newInstance (String cityName){
+
+    public static FragmentForecast newInstance (City city){
+
+        FragmentForecast fragment = new FragmentForecast();
+
+        Bundle arguments = new Bundle();
+        //arguments.putString(FragmentForecast.ARG_CITY, city);
+        arguments.putSerializable(FragmentForecast.ARG_CITY,city);
+        fragment.setArguments(arguments);
+
+        return fragment;
+    }
 
     @Nullable
     @Override
@@ -67,12 +87,10 @@ public class FragmentForecast extends Fragment {
         mCityName = (TextView) root.findViewById(R.id.city);
 
 
-        //Con los argumentos que se pasan configuro la vista
-        Bundle arguments = getArguments();
-        String cityName= arguments.getString("cityName");
-        mCityName.setText(cityName);
-
-
+        //Con los argumentos que se recuperan configuro la vista (sólo paso nombre de la ciudad
+        //Bundle arguments = getArguments();
+        //String cityName= arguments.getString(ARG_CITY_NAME);
+        //mCityName.setText(cityName);
 
         //Valor por defecto para showCelsius;
         //showCelsius = true;
@@ -86,7 +104,8 @@ public class FragmentForecast extends Fragment {
         //Forecast forecast = new Forecast(24,10,25,"Sol y nubes", R.drawable.sun_cloud);
         mForecast = new Forecast(24,10,25,"Sol y nubes", R.drawable.sun_cloud);
 
-        setForecast(mForecast);
+        //setForecast(mForecast);
+        updateCityInfo();
 
         return root;
     }
@@ -97,6 +116,11 @@ public class FragmentForecast extends Fragment {
 
         //Tengo menu (llama a los métodos que crean los menus)
         setHasOptionsMenu(true);
+
+        //Es un buen sitio para recuperar los parametros que nos mandan (en este caso es un city)
+        if (getArguments()!= null){
+            mCity= (City) getArguments().getSerializable(ARG_CITY);
+        }
     }
 
     //Indica como es el Menu
@@ -176,7 +200,8 @@ public class FragmentForecast extends Fragment {
                         .commit();
 
                 //Actualizamos el módelo
-                setForecast(mForecast);
+                //setForecast(mForecast);
+                updateCityInfo();
 
                 //Avisamos al usuario de los cambios en las preferencias (Toast)
                 //Toast.makeText(this,"Cambios Realizados",Toast.LENGTH_LONG).show();
@@ -197,7 +222,8 @@ public class FragmentForecast extends Fragment {
                                         .putBoolean(PREFERENCE_UNITS, showCelsius)
                                         .commit();
                                 //Actualizamos la interfaz(modelo)
-                                setForecast(mForecast);
+                                //setForecast(mForecast);
+                                updateCityInfo();
                             }
                         })
                         .show();
@@ -228,6 +254,37 @@ public class FragmentForecast extends Fragment {
 
 
     }
+
+    public void updateCityInfo (){
+
+        Forecast forecast = mCity.getForecast();
+
+        //Actualizamos el nombre de la ciudad
+        mCityName.setText(mCity.getnName());
+
+        float maxTemp = forecast.getMaxTemp();
+        float minTemp = forecast.getMinTemp();
+
+        Log.v ("boolean", String.valueOf(showCelsius));
+
+        if (showCelsius != true){
+
+            maxTemp = atFarnheid(maxTemp);
+            minTemp = atFarnheid(minTemp);
+        }
+
+        //mMax_temp.setText(String.valueOf(forecast.getMaxTemp()));
+        mMax_temp.setText(String.format("Temperatura máxima: %.2f", maxTemp));
+        mMin_temp.setText(String.format("Temperatura mínima: %.2f", minTemp));
+        mHumidity.setText(String.format("Humedad: %.2f", forecast.getHumidity()));
+        mDescription.setText(forecast.getDescription());
+        //Para el icono utilizamos un método que nos devuelve un recurso
+        mForecast_image.setImageResource(forecast.getIcon());
+
+
+    }
+
+
 
     public static float atFarnheid (Float celsius){
 
