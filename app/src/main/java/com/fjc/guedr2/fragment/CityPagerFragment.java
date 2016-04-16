@@ -28,10 +28,27 @@ public class CityPagerFragment extends Fragment {
 
     private Cities mCities;
     private ViewPager mViewPager;
+    public static final String ARG_CITY_INDEX = "ARG_CITY_INDEX";
+
+    private int mInitialCityIndex;
 
     public CityPagerFragment() {
         // Required empty public constructor
 
+    }
+
+    //Lo que recibo de la actividad del pager (CityPagerActivity) se lo tiene que pasar a su fragment CityPagerFragment
+    //Este método sirve para crear instancias de CityPagerFragment pasandole argumentos.
+    //Desde la actividad CityPagerActivity llamamos a este método pasandole la posicion a la que quiero ir dentro del fragment
+    public static CityPagerFragment newInstance (int position){
+
+        CityPagerFragment fragment = new CityPagerFragment();
+
+        Bundle arguments = new Bundle();
+        arguments.putInt(ARG_CITY_INDEX,position);
+        fragment.setArguments(arguments);
+
+        return fragment;
     }
 
     @Override
@@ -41,6 +58,12 @@ public class CityPagerFragment extends Fragment {
         //Tengo menu (llama a los métodos que crean los menus)
         //Si un fragment tiene meú decir que tiene menu siempre
         setHasOptionsMenu(true);
+
+        //Compruebo si me llegan argumentos al fragment
+        if (getArguments() != null){
+
+            mInitialCityIndex = getArguments().getInt(ARG_CITY_INDEX); //getInt devuelve cero si no recupera valor
+        }
 
 
     }
@@ -91,6 +114,10 @@ public class CityPagerFragment extends Fragment {
                                                }
                                            }
         );
+
+
+        //Me muevo a la ciudad indicada en mInitialCityIndex
+        mViewPager.setCurrentItem(mInitialCityIndex);
 
         //updateCityInfo(0);
         //Anteriormente se pasaba la position

@@ -1,14 +1,18 @@
 package com.fjc.guedr2.activity;
 
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 
 import com.fjc.guedr2.R;
+import com.fjc.guedr2.fragment.CityListFragment;
 import com.fjc.guedr2.fragment.CityPagerFragment;
+import com.fjc.guedr2.model.City;
 
-public class ForecastActivity extends AppCompatActivity {
+public class ForecastActivity extends AppCompatActivity implements CityListFragment.CityListListener{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,12 +47,36 @@ public class ForecastActivity extends AppCompatActivity {
         //Cambia el tamaño de la interfaz por algún motivo (split view)
 
         //Para eso lo comprobamos preguntandole al FragmentManager a ver si ya exite un R.id.fragment_city_pager
-        if (fm.findFragmentById(R.id.fragment_city_pager)==null) {
+        //Ese fragment_city_pager es un hueco donde se coloca el frangment
+        //Vamos a cambiar el nombre (id) del hueco creado para el fragment
+        // que está en activity_forecast.xml cambiando fragment_city_pager por fragment_city_list
+        if (fm.findFragmentById(R.id.fragment_city_list)==null) {
+
             //Como no existe lo añadimos como una transaccion a nuestra jerarquia de vistas
-            fm.beginTransaction()
+
+            //Antes devoviamos un CityPageFragment, ahora vamos a devolver un CityListFragment
+            /*fm.beginTransaction()
                     .add(R.id.fragment_city_pager, new CityPagerFragment())
+                    .commit();*/
+
+            fm.beginTransaction()
+                    .add(R.id.fragment_city_list, new CityListFragment())
                     .commit();
         }
+    }
+
+    @Override
+    public void onCitySelected(City city, int position) {
+        //Aqui me entero de que una ciudad ha sido seleccionada en el CityListFragment
+        //Tengo que mostrar la ciudad en el CityPagerFragment
+        Log.v("ForecastActivity", " se ha seleccionado la ciudad " + position);
+
+        //Llamamos a la actividad del CityPager
+        Intent intent = new Intent(this,CityPagerActivity.class);
+
+        //Pasamos los parametros a la actividad del CityPagerActivity
+        intent.putExtra(CityPagerActivity.EXTRA_CITY_INDEX,position);
+        startActivity(intent);
     }
 
 

@@ -16,6 +16,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".activity.SettingActivity"> </activity>
+        <activity android:name=".activity.CityPagerActivity"> </activity>
     </application>
 
 </manifest>
