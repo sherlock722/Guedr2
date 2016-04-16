@@ -10,6 +10,9 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -24,9 +27,21 @@ import com.fjc.guedr2.model.City;
 public class CityPagerFragment extends Fragment {
 
     private Cities mCities;
+    private ViewPager mViewPager;
 
     public CityPagerFragment() {
         // Required empty public constructor
+
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        //Tengo menu (llama a los métodos que crean los menus)
+        //Si un fragment tiene meú decir que tiene menu siempre
+        setHasOptionsMenu(true);
+
 
     }
 
@@ -40,7 +55,9 @@ public class CityPagerFragment extends Fragment {
         mCities = new Cities();
 
         //Accedemos al ViewPager de nuestra interfaz
-        ViewPager pager = (ViewPager) root.findViewById(R.id.view_pager);
+        //ViewPager pager = (ViewPager) root.findViewById(R.id.view_pager);
+        //Creamos el View Pager como atributo para utilizarlo en los menus
+        mViewPager = (ViewPager) root.findViewById(R.id.view_pager);
 
         //Cuantos fragment tiene nuestra interfaz >> Necesitamos lo que se llama la clase Adaptador
         //Permite unir el modelo con la interfaz. Pasamos el módelo al adaptador y el Pager sabrá  apartir del Adaptador
@@ -48,35 +65,42 @@ public class CityPagerFragment extends Fragment {
 
 
         //Le decimos al ViewPager quien es su adaptador que le dará los fragment que debe dibujar
-        pager.setAdapter(new CityPagerAdapter(getFragmentManager()));
+        mViewPager.setAdapter(new CityPagerAdapter(getFragmentManager()));
 
         //Me entero cuando el usuario cambia de pagina en el ViewPager
 
-        pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-              @Override
-              public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                                               @Override
+                                               public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-               }
+                                               }
 
-                //Aqui es donde el usuario ha cambiado de página
-                @Override
-                public void onPageSelected(int position) {
+                                               //Aqui es donde el usuario ha cambiado de página
+                                               @Override
+                                               public void onPageSelected(int position) {
 
-                    updateCityInfo(position);
+                                                   //updateCityInfo(position); //Anteriormente se pasaba la position
+                                                   updateCityInfo();
 
-                }
 
-                @Override
-                public void onPageScrollStateChanged(int state) {
+                                               }
 
-                }
-               }
+                                               @Override
+                                               public void onPageScrollStateChanged(int state) {
+
+                                               }
+                                           }
         );
 
-        updateCityInfo(0);
+        //updateCityInfo(0);
+        //Anteriormente se pasaba la position
+        updateCityInfo();
+
         return root;
     }
-    public void updateCityInfo (int position){
+    public void updateCityInfo (){
+
+        int position = mViewPager.getCurrentItem();
         //Modificamos el título de la Toolbar.
         //Para ello necesitamos:
 
@@ -93,6 +117,62 @@ public class CityPagerFragment extends Fragment {
 
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+
+        //Inflamos el menu
+        inflater.inflate(R.menu.citypager,menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        boolean superValue2 = super.onOptionsItemSelected(item);
+
+        //Comprobamos que opción de menu se ha pulsado
+        if (item.getItemId() == R.id.previus ){
+            //Retrocedemos una página (utilizamos el ViewPager)
+
+            mViewPager.setCurrentItem(mViewPager.getCurrentItem()-1);
+            //Se cambia el titulo
+            updateCityInfo();
+
+            return true;
+
+        } else if (item.getItemId() == R.id.next){
+            //Avanzamos una página
+            mViewPager.setCurrentItem(mViewPager.getCurrentItem()+1);
+            //Se cambia el titulo
+            updateCityInfo();
+
+            return true;
+        }
+
+
+        return superValue2;
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        //Por si se llama antes del OnCreate
+        //El ViewPager me dice en que posición estoy
+        if (mViewPager != null){
+
+            //Sacamos el mene anterior y siguiente
+            MenuItem menuPrev = menu.findItem(R.id.previus);
+            MenuItem menuNext = menu.findItem(R.id.next);
+
+            //Los activo o los desactivo segun en la posicion en la que esté
+            boolean nextEnable = mViewPager.getCurrentItem() < mCities.getCities().size()-1;
+            menuNext.setEnabled(nextEnable);
+
+            boolean prevEnable = mViewPager.getCurrentItem() > 0;
+            menuPrev.setEnabled(prevEnable);
+
+        }
+    }
 }
 
 //Creamos la calse CityPagerAdapter
