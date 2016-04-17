@@ -15,6 +15,12 @@ public class City implements Serializable{
         mForecast = forecast;
     }
 
+    //Creo un Constructor sólo con el nombre de la Ciudad.
+    //El Forecast lo bajo de internet
+    public City(String nName) {
+        this.nName = nName;
+    }
+
     public String getnName() {
         return nName;
     }

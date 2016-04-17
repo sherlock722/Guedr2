@@ -65,7 +65,7 @@ public class CityPagerActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         boolean superSelected = super.onOptionsItemSelected(item);
 
-        //Compruebo si han pulsado el boton de back que tiene un id especial
+        //Compruebo si han pulsado el boton de back que tiene un id especial (home)
         if (item.getItemId()== android.R.id.home){
             finish();
             return true;

@@ -2,9 +2,11 @@ package com.fjc.guedr2.activity;
 
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 import com.fjc.guedr2.R;
@@ -18,6 +20,14 @@ public class ForecastActivity extends AppCompatActivity implements CityListFragm
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forecast);
 
+        //Clase que nos da información del dispositivo
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        int width = metrics.widthPixels; //Ancho
+        int height = metrics.heightPixels; //Alto
+        int dpWith = (int)(width/metrics.density); //pixels del ancho
+        int dpHeight = (int)(height/metrics.density); //Pixels del alto
+        String model = Build.MODEL; //Módelo
+        int dpi = metrics.densityDpi;
 
         //ToolBar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -50,19 +60,45 @@ public class ForecastActivity extends AppCompatActivity implements CityListFragm
         //Ese fragment_city_pager es un hueco donde se coloca el frangment
         //Vamos a cambiar el nombre (id) del hueco creado para el fragment
         // que está en activity_forecast.xml cambiando fragment_city_pager por fragment_city_list
-        if (fm.findFragmentById(R.id.fragment_city_list)==null) {
 
-            //Como no existe lo añadimos como una transaccion a nuestra jerarquia de vistas
+        //Debido a que tenemos varios layouts tenemos que preguntar si en esos layouts que hemos
+        // creado están los fragments que he creado.
 
-            //Antes devoviamos un CityPageFragment, ahora vamos a devolver un CityListFragment
-            /*fm.beginTransaction()
+        //Vamos a preguntar si el interfaz que hemos cargado tiene hueco para el CityListFragment
+        if (findViewById(R.id.fragment_city_list)!= null) {
+
+            //Pues si que tenemos hueco, por lo que vamos a cargar el fragment del list si no esta cargado
+            if (fm.findFragmentById(R.id.fragment_city_list)==null) {
+
+                //Como no existe lo añadimos como una transaccion a nuestra jerarquia de vistas
+
+                //Antes devoviamos un CityPageFragment, ahora vamos a devolver un CityListFragment
+                   /*fm.beginTransaction()
                     .add(R.id.fragment_city_pager, new CityPagerFragment())
                     .commit();*/
 
-            fm.beginTransaction()
-                    .add(R.id.fragment_city_list, new CityListFragment())
-                    .commit();
+                fm.beginTransaction()
+                        .add(R.id.fragment_city_list, new CityListFragment())
+                        .commit();
+
+            }
         }
+
+        //Interfaz
+        //Vamos a preguntar si el interfaz que hemos cargado tiene hueco para el CityPagerFragment
+        if (findViewById(R.id.fragment_city_pager)!= null){
+
+            //Pues si que tenemos hueco, por lo que vamos a cargar el fragment del pager si no esta cargado
+            if (fm.findFragmentById(R.id.fragment_city_pager) == null) {
+
+                fm.beginTransaction()
+                        .add(R.id.fragment_city_pager, new CityPagerFragment().newInstance(0))
+                        .commit();
+            }
+
+
+        }
+
     }
 
     @Override
@@ -71,12 +107,32 @@ public class ForecastActivity extends AppCompatActivity implements CityListFragm
         //Tengo que mostrar la ciudad en el CityPagerFragment
         Log.v("ForecastActivity", " se ha seleccionado la ciudad " + position);
 
-        //Llamamos a la actividad del CityPager
-        Intent intent = new Intent(this,CityPagerActivity.class);
 
-        //Pasamos los parametros a la actividad del CityPagerActivity
-        intent.putExtra(CityPagerActivity.EXTRA_CITY_INDEX,position);
-        startActivity(intent);
+        //Como tenemos varios layout no en todos queremos cambiar de actividad
+        //por lo que vamos a comprobar si es necesario cambiar de actividad
+        //Sabemos que no tenemos que cambiar si tenemos una referecia no nula al CityPagerFragment
+
+        FragmentManager manager = getFragmentManager();
+
+        CityPagerFragment cityPagerFragment = (CityPagerFragment) manager.findFragmentById(R.id.fragment_city_pager);
+
+        //Tenemos una referencia al pager por lo que no tenemos que cambiar de actividad
+        if (cityPagerFragment != null){
+            //Le indicamos al fragment que muestre la ciudad de la posición "position"
+            //Para ello modificamos el CityPagerFragment y le creamos un método público (showCity) que
+            //vaya a la ciudad de la posición "position" y se llamará desde esta actividad
+            //Esta es otra forma de comunicar una actividad con un fragment, llamando a
+            //métodos públicos del fragment
+            cityPagerFragment.showCity(position);
+
+        }else {
+            //Llamamos a la actividad del CityPager
+            Intent intent = new Intent(this, CityPagerActivity.class);
+
+            //Pasamos los parametros a la actividad del CityPagerActivity
+            intent.putExtra(CityPagerActivity.EXTRA_CITY_INDEX, position);
+            startActivity(intent);
+        }
     }
 
 

@@ -125,7 +125,7 @@ public class CityPagerFragment extends Fragment {
 
         return root;
     }
-    public void updateCityInfo (){
+    protected void updateCityInfo (){
 
         int position = mViewPager.getCurrentItem();
         //Modificamos el título de la Toolbar.
@@ -187,7 +187,7 @@ public class CityPagerFragment extends Fragment {
         //El ViewPager me dice en que posición estoy
         if (mViewPager != null){
 
-            //Sacamos el mene anterior y siguiente
+            //Sacamos el menú anterior y siguiente
             MenuItem menuPrev = menu.findItem(R.id.previus);
             MenuItem menuNext = menu.findItem(R.id.next);
 
@@ -200,6 +200,14 @@ public class CityPagerFragment extends Fragment {
 
         }
     }
+
+    //Creamos el método que me permite ir a una ciudad por posicion
+    public void showCity (int position){
+
+        mViewPager.setCurrentItem(position);
+        updateCityInfo();
+    }
+
 }
 
 //Creamos la calse CityPagerAdapter

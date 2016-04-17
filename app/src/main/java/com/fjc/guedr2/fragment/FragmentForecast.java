@@ -22,6 +22,10 @@ import com.fjc.guedr2.model.City;
 import com.fjc.guedr2.model.Forecast;
 import com.fjc.guedr2.R;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 /**
  * Created by javier on 14/4/16.
  */
@@ -259,27 +263,93 @@ public class FragmentForecast extends Fragment {
 
         Forecast forecast = mCity.getForecast();
 
-        //Actualizamos el nombre de la ciudad
-        mCityName.setText(mCity.getnName());
+        //Si en el modelo me llega una ciudad sin Forecast entonces me lo bajo del servicio del tiempo
+        //Pero si tiene Forecast sigo haciendo lo mismo que antes
 
-        float maxTemp = forecast.getMaxTemp();
-        float minTemp = forecast.getMinTemp();
+        if (forecast == null){
 
-        Log.v ("boolean", String.valueOf(showCelsius));
+            downloadWheater();
 
-        if (showCelsius != true){
+        }else {
+            //Actualizamos el nombre de la ciudad
+            mCityName.setText(mCity.getnName());
 
-            maxTemp = atFarnheid(maxTemp);
-            minTemp = atFarnheid(minTemp);
+            float maxTemp = forecast.getMaxTemp();
+            float minTemp = forecast.getMinTemp();
+
+            Log.v("boolean", String.valueOf(showCelsius));
+
+            if (showCelsius != true) {
+
+                maxTemp = atFarnheid(maxTemp);
+                minTemp = atFarnheid(minTemp);
+            }
+
+            //mMax_temp.setText(String.valueOf(forecast.getMaxTemp()));
+            mMax_temp.setText(String.format("Temperatura máxima: %.2f", maxTemp));
+            mMin_temp.setText(String.format("Temperatura mínima: %.2f", minTemp));
+            mHumidity.setText(String.format("Humedad: %.2f", forecast.getHumidity()));
+            mDescription.setText(forecast.getDescription());
+            //Para el icono utilizamos un método que nos devuelve un recurso
+            mForecast_image.setImageResource(forecast.getIcon());
         }
 
-        //mMax_temp.setText(String.valueOf(forecast.getMaxTemp()));
-        mMax_temp.setText(String.format("Temperatura máxima: %.2f", maxTemp));
-        mMin_temp.setText(String.format("Temperatura mínima: %.2f", minTemp));
-        mHumidity.setText(String.format("Humedad: %.2f", forecast.getHumidity()));
-        mDescription.setText(forecast.getDescription());
-        //Para el icono utilizamos un método que nos devuelve un recurso
-        mForecast_image.setImageResource(forecast.getIcon());
+
+    }
+
+    private void downloadWheater() {
+
+        //Me creo una URL
+        URL url =null;
+        //Que voy a bajar en un InputStream (es una clase para recibir datos como un flujo)
+        InputStream input = null;
+
+        //Controlamos el error en caso de producirse
+        try{
+
+           //Con String.format puedo crear una cadena a partir de unos parametros
+           url =new URL (String.format("http://api.openweathermap.org/data/2.5/forecast/daily?q=%s,uk&appid=67ec33ef65d1a073b8198058efe25905",mCity.getnName()));
+
+           //Abro una conexion
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            //Me conecto
+            con.connect();
+
+            //Metodo que devuelve la longitud de los datos que me estoy bajando (respuesta)
+            //Es interesante porque puedo crear una barra de descarga si la longitud es muy grande
+            //El servicio del tiempo que estamos usando no lo hace no lo hace
+            int responseLengt = con.getContentLength();
+
+            //Bajamos la informacion por trocitos de 1k en 1k
+            byte data[]= new byte[1024];
+
+            //Saber cuanto me he bajado
+            int dowloaderBytes;
+
+            input = con.getInputStream();
+
+            //Me construyo una cadena cada vez más grande con la clase StringBuilder
+            //Va añadiendo datos que me voy bajando
+            //Es una version mutable de los String
+            StringBuilder sb = new StringBuilder();
+
+            //Si los datos que me he bajado al leer en este buffer sean <> -1
+            while ((dowloaderBytes = input.read(data)) != -1){//El servicio devuelve -1 cuando ha terminado de leer
+
+                //Creo una nueva cadena a partir de un array de bytes
+                sb.append(new String(data,0, dowloaderBytes));
+
+            }
+
+            //Analizamos los datos para convertirlo en algo que se pueda manejar en código
+
+
+        }catch (Exception ex){
+
+            //Me permite soltar en el Log la ristra de errores que se produzcan
+            ex.printStackTrace();
+
+        }
 
 
     }
