@@ -351,7 +351,6 @@ public class FragmentForecast extends Fragment {
 
         }
 
-
     }
 
     public static float atFarnheid (Float celsius){
