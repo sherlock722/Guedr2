@@ -1,7 +1,9 @@
 package com.fjc.guedr2.fragment;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -448,7 +450,9 @@ public class FragmentForecast extends Fragment {
                     //Creamos nuestro objeto forecast
                     //Forecast forecast = new Forecast(max,min,humidity,description,icon);
                     //mCity.setForecast(forecast);
-                    return new Forecast(max,min,humidity,description,icon);
+
+                    //Retornamos el objeto forecast
+                    //return new Forecast(max,min,humidity,description,icon);
 
                     //Pedimos que de nuevo se actualice la interfaz
                     //updateCityInfo();
@@ -485,13 +489,39 @@ public class FragmentForecast extends Fragment {
             @Override
             protected void onPostExecute(Forecast forecast) {
                 super.onPostExecute(forecast);
-                //Aqui preparamos la interfaz con los datos que nos ha dado doInBackground. Estamos en el hilo principal
 
-                //Actualizamos el modelo
-                mCity.setForecast(forecast);
+                if (forecast != null) {
+                    //Aqui preparamos la interfaz con los datos que nos ha dado doInBackground. Estamos en el hilo principal
+                    //Actualizamos el modelo
+                    mCity.setForecast(forecast);
+                    //Actualizamos la inrterfaz
+                    updateCityInfo();
+                } else{
 
-                //Actualizamos la inrterfaz
-                updateCityInfo();
+                    //Ha habido un error se lo indicamos al usuario con un Dialogo
+                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
+                    //Configuro el Dialogo
+                    alertDialog.setTitle("Error");
+                    alertDialog.setMessage("No se pudo descargar la información del tiempo");
+                    alertDialog.setPositiveButton("Reintentar", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            downloadWheater();
+                        }
+                    });
+                    alertDialog.setNegativeButton("Volver", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //Esto no se hace así. Se avisa a la actividad y ella decide
+                            getActivity().finish();
+                        }
+                    });
+
+                    //Mostramos el dialogo
+                    alertDialog.show();
+
+
+                }
 
 
             }
