@@ -452,7 +452,8 @@ public class FragmentForecast extends Fragment {
                     //mCity.setForecast(forecast);
 
                     //Retornamos el objeto forecast
-                    //return new Forecast(max,min,humidity,description,icon);
+                    //Si se comenta podemos ver como funciona en el onPostExecute el AlertDialog
+                    return new Forecast(max,min,humidity,description,icon);
 
                     //Pedimos que de nuevo se actualice la interfaz
                     //updateCityInfo();
