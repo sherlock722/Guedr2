@@ -3,6 +3,7 @@ package com.fjc.guedr2.fragment;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
@@ -15,13 +16,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.ViewSwitcher;
 
 import com.fjc.guedr2.activity.SettingActivity;
 import com.fjc.guedr2.model.City;
 import com.fjc.guedr2.model.Forecast;
 import com.fjc.guedr2.R;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -33,6 +40,8 @@ public class FragmentForecast extends Fragment {
 
     //Para saber de que pantalla vengo (este se utiliza para la pantalla de ajustes)
     private static final int REQUEST_UNIT = 1;
+    private static final int LOADING_VIEW_INDEX = 0;
+    private static final int FORECAST_VIEW_INDEX = 1;
 
     private TextView mMax_temp;
     private TextView mMin_temp;
@@ -43,6 +52,8 @@ public class FragmentForecast extends Fragment {
     private Forecast mForecast;
     private TextView mCityName;
     private City mCity;
+    private ViewSwitcher mViewSwitcher;
+    private ProgressBar mProgressBar;
 
 
     //Para persistir datos
@@ -89,7 +100,14 @@ public class FragmentForecast extends Fragment {
         mDescription = (TextView) root.findViewById(R.id.description_forecast);
         mForecast_image = (ImageView) root.findViewById(R.id.forecast_img);
         mCityName = (TextView) root.findViewById(R.id.city);
+        mViewSwitcher = (ViewSwitcher) root.findViewById(R.id.view_switcher);
+        mProgressBar = (ProgressBar) root.findViewById(R.id.progress);
 
+        //Le decimos al ViewSwitcher como queremos las animaciones entre vistas
+        //Cuando entra una vista
+        mViewSwitcher.setInAnimation(getActivity(), android.R.anim.fade_in);
+        //Cuando se sale de una vista
+        mViewSwitcher.setOutAnimation(getActivity(), android.R.anim.fade_out);
 
         //Con los argumentos que se recuperan configuro la vista (sólo paso nombre de la ciudad
         //Bundle arguments = getArguments();
@@ -271,9 +289,14 @@ public class FragmentForecast extends Fragment {
             downloadWheater();
 
         }else {
+
+            //Muestro en la vista contenedora ViewSwitcher la pantalla del tiempo
+            mViewSwitcher.setDisplayedChild(FORECAST_VIEW_INDEX);
+
             //Actualizamos el nombre de la ciudad
             mCityName.setText(mCity.getnName());
 
+            //Muestro en la interfaz mi modelo
             float maxTemp = forecast.getMaxTemp();
             float minTemp = forecast.getMinTemp();
 
@@ -297,60 +320,192 @@ public class FragmentForecast extends Fragment {
 
     }
 
+
+    //Metodo para bajar la información de un servicio de tiempo
     private void downloadWheater() {
 
-        //Me creo una URL
-        URL url =null;
-        //Que voy a bajar en un InputStream (es una clase para recibir datos como un flujo)
-        InputStream input = null;
+        //Necesito bajar la información en segundo plano por lo que utilizo la clase AsyncTask
+        //Esta clase da un feedback al usuario, despúes hace la operacion y por último vuelve a
+        //dar feedback al usuario
 
-        //Controlamos el error en caso de producirse
-        try{
+        //AsynTask es una clase abstracta y tenemos que implementar el método doInBackground
 
-           //Con String.format puedo crear una cadena a partir de unos parametros
-           url =new URL (String.format("http://api.openweathermap.org/data/2.5/forecast/daily?q=%s,uk&appid=67ec33ef65d1a073b8198058efe25905",mCity.getnName()));
+        //Recibe tres tipos para hacerlo genericos (tipo los parametros de entrada (City),tipo del progreso (Integer)
+        //y la salida al realizar la operación (Forecast)
+        final AsyncTask<City, Integer, Forecast> weatherDowloader = new AsyncTask<City, Integer, Forecast>() {
 
-           //Abro una conexion
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            //Me conecto
-            con.connect();
+            //Guardo el objeto city como una propiedad
+            private City mCity;
 
-            //Metodo que devuelve la longitud de los datos que me estoy bajando (respuesta)
-            //Es interesante porque puedo crear una barra de descarga si la longitud es muy grande
-            //El servicio del tiempo que estamos usando no lo hace no lo hace
-            int responseLengt = con.getContentLength();
+            //Es el único método obligatorio que tenemos que implementar
+            //Se ejecuta en otro hilo distinto del principal
+            @Override
+            protected Forecast doInBackground(City... params) { //Numero indeterminado de City (City... params)
 
-            //Bajamos la informacion por trocitos de 1k en 1k
-            byte data[]= new byte[1024];
+                //Nos quedamos con la City (0)
+                City city = params[0];
+                //Se lo asignamos a la propiedad
+                mCity=city;
 
-            //Saber cuanto me he bajado
-            int dowloaderBytes;
+                //Me creo una URL
+                URL url =null;
+                //Que voy a bajar en un InputStream (es una clase para recibir datos como un flujo)
+                InputStream input = null;
 
-            input = con.getInputStream();
+                //Controlamos el error en caso de producirse
+                try{
 
-            //Me construyo una cadena cada vez más grande con la clase StringBuilder
-            //Va añadiendo datos que me voy bajando
-            //Es una version mutable de los String
-            StringBuilder sb = new StringBuilder();
+                    //Con String.format puedo crear una cadena a partir de unos parametros
+                    url =new URL (String.format("http://api.openweathermap.org/data/2.5/forecast/daily?q=%s,uk&appid=67ec33ef65d1a073b8198058efe25905&units=metric&lang=sp", city.getnName()));
 
-            //Si los datos que me he bajado al leer en este buffer sean <> -1
-            while ((dowloaderBytes = input.read(data)) != -1){//El servicio devuelve -1 cuando ha terminado de leer
+                    //Abro una conexion
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    //Me conecto
+                    con.connect();
 
-                //Creo una nueva cadena a partir de un array de bytes
-                sb.append(new String(data,0, dowloaderBytes));
+                    //Metodo que devuelve la longitud de los datos que me estoy bajando (respuesta)
+                    //Es interesante porque puedo crear una barra de descarga si la longitud es muy grande
+                    //El servicio del tiempo que estamos usando no lo hace no lo hace
+                    int responseLengt = con.getContentLength();
+
+                    //Bajamos la informacion por trocitos de 1k en 1k
+                    byte data[]= new byte[1024];
+
+                    long currentBytes=0;
+
+                    //Saber cuanto me he bajado
+                    int dowloaderBytes;
+
+                    input = con.getInputStream();
+
+                    //Me construyo una cadena cada vez más grande con la clase StringBuilder
+                    //Va añadiendo datos que me voy bajando
+                    //Es una version mutable de los String
+                    StringBuilder sb = new StringBuilder();
+
+                    //Si los datos que me he bajado al leer en este buffer sean <> -1
+                    while ((dowloaderBytes = input.read(data)) != -1){//El servicio devuelve -1 cuando ha terminado de leer
+
+                        //Creo una nueva cadena a partir de un array de bytes
+                        sb.append(new String(data,0, dowloaderBytes));
+
+                        if (responseLengt > 0) {
+                            currentBytes += dowloaderBytes;
+                            //Aqui actulizariamos nuestra barra de procesoncon currentBytes
+                            publishProgress((int) (dowloaderBytes *100)/responseLengt);
+                        }
+
+                    }
+
+                    //Analizamos los datos para convertirlo en algo que se pueda manejar en código
+
+                    //Cojo la cadena mutante  (StringBuilder sb) y lo convierto en una cadena que puedo parsear
+                    JSONObject jsonRoot = new JSONObject(sb.toString()); //jsonRoot es la raiz de mi objeto JSON
+
+                    //Tengo que buscar acceder al objeto list con la lista de los distintos días
+                    JSONArray days = jsonRoot.getJSONArray("list");
+
+                    //Saco el día actual (que es el primero de list)
+                    JSONObject today = days.getJSONObject(0);
+
+                    //Obtengo los datos de ese today
+                    float max = (float) today.getJSONObject("temp").getDouble("max");
+                    float min = (float) today.getJSONObject("temp").getDouble("min");
+                    float humidity = (float) today.getDouble("humidity");
+                    String description = today.getJSONArray("weather").getJSONObject(0).getString("description");
+                    String iconString = today.getJSONArray("weather").getJSONObject(0).getString("icon");
+
+                    //Quitamos el último caracter del iconString
+                    iconString = iconString.substring(0,iconString.length()-2);
+
+                    //Valor por defecto a icon
+                    int icon = R.drawable.ico_01;
+
+                    //Asignamos valor a icon en funcion de lo que me devuelva iconString leido del JSON
+                    if (iconString.equals("01")){
+                        icon = R.drawable.ico_01;
+                    }else if (iconString.equals("02")){
+                        icon = R.drawable.ico_02;
+                    }else if (iconString.equals("03")) {
+                        icon = R.drawable.ico_03;
+                    }else if (iconString.equals("04")) {
+                        icon = R.drawable.ico_04;
+                    }else if (iconString.equals("09")){
+                        icon = R.drawable.ico_09;
+                    }else if (iconString.equals("10")){
+                        icon = R.drawable.ico_10;
+                    }else if (iconString.equals("11")){
+                        icon = R.drawable.ico_11;
+                    }else if (iconString.equals("13")){
+                        icon = R.drawable.ico_13;
+                    }else if (iconString.equals("50")) {
+                        icon = R.drawable.ico_50;
+                    }
+
+                    //Simulamos una carga de 5 segundos
+                    Thread.sleep(5000);
+
+                    //Creamos nuestro objeto forecast
+                    //Forecast forecast = new Forecast(max,min,humidity,description,icon);
+                    //mCity.setForecast(forecast);
+                    return new Forecast(max,min,humidity,description,icon);
+
+                    //Pedimos que de nuevo se actualice la interfaz
+                    //updateCityInfo();
+
+                }catch (Exception ex){
+
+                    //Me permite soltar en el Log la ristra de errores que se produzcan
+                    ex.printStackTrace();
+
+                }
+                finally {
+                    //Cerramos la conexion
+                    if (input != null){
+                        try {
+                            input.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                //Si hay cualquier error devolvemos null
+                return null;
+            }
+
+            //Estos métodos se ejecutan desde el hilo principal
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                //Aqui preparamos la interfaz para la tarea larga. Estamos en el hilo principal
+                mViewSwitcher.setDisplayedChild(LOADING_VIEW_INDEX);
+            }
+
+            @Override
+            protected void onPostExecute(Forecast forecast) {
+                super.onPostExecute(forecast);
+                //Aqui preparamos la interfaz con los datos que nos ha dado doInBackground. Estamos en el hilo principal
+
+                //Actualizamos el modelo
+                mCity.setForecast(forecast);
+
+                //Actualizamos la inrterfaz
+                updateCityInfo();
+
 
             }
 
-            //Analizamos los datos para convertirlo en algo que se pueda manejar en código
+            @Override
+            protected void onProgressUpdate(Integer... values) {
+                super.onProgressUpdate(values);
+                //Actualizamos la barra de progreso
+                mProgressBar.setProgress(values [0]);
+            }
+        };
 
-
-        }catch (Exception ex){
-
-            //Me permite soltar en el Log la ristra de errores que se produzcan
-            ex.printStackTrace();
-
-        }
-
+        //ejecutamos la tarea (El AsynnTask)
+        weatherDowloader.execute(mCity);
     }
 
     public static float atFarnheid (Float celsius){
