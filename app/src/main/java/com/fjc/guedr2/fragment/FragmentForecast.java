@@ -10,6 +10,10 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,6 +27,7 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.fjc.guedr2.activity.SettingActivity;
+import com.fjc.guedr2.adapter.ForcastRecyclerViewAdapter;
 import com.fjc.guedr2.model.City;
 import com.fjc.guedr2.model.Forecast;
 import com.fjc.guedr2.R;
@@ -34,6 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.LinkedList;
 
 /**
  * Created by javier on 14/4/16.
@@ -45,21 +51,24 @@ public class FragmentForecast extends Fragment {
     private static final int LOADING_VIEW_INDEX = 0;
     private static final int FORECAST_VIEW_INDEX = 1;
 
-    private TextView mMax_temp;
+    //Me lo llevo al ForcastRecyclerViewAdapter
+    /*private TextView mMax_temp;
     private TextView mMin_temp;
     private TextView mHumidity;
     private TextView mDescription;
-    private ImageView mForecast_image;
+    private ImageView mForecast_image;*/
+
     private boolean showCelsius;
     private Forecast mForecast;
     private TextView mCityName;
     private City mCity;
     private ViewSwitcher mViewSwitcher;
     private ProgressBar mProgressBar;
+    private RecyclerView mList;
 
 
     //Para persistir datos
-    private static final String PREFERENCE_UNITS="units";
+    public static final String PREFERENCE_UNITS="units";
     public static final String ARG_CITY_NAME="cityName";
 
     public static final String ARG_CITY="city";
@@ -96,11 +105,13 @@ public class FragmentForecast extends Fragment {
 
 
         //En la vista raiz (root) tengo acceso al método findViewById
-        mMax_temp = (TextView) root.findViewById(R.id.max_temp);
+
+        //Me los llevo al ForcastRecyclerViewAdapter
+        /*mMax_temp = (TextView) root.findViewById(R.id.max_temp);
         mMin_temp = (TextView) root.findViewById(R.id.min_temp);
         mHumidity = (TextView) root.findViewById(R.id.humidity);
         mDescription = (TextView) root.findViewById(R.id.description_forecast);
-        mForecast_image = (ImageView) root.findViewById(R.id.forecast_img);
+        mForecast_image = (ImageView) root.findViewById(R.id.forecast_img);*/
         mCityName = (TextView) root.findViewById(R.id.city);
         mViewSwitcher = (ViewSwitcher) root.findViewById(R.id.view_switcher);
         mProgressBar = (ProgressBar) root.findViewById(R.id.progress);
@@ -111,6 +122,25 @@ public class FragmentForecast extends Fragment {
         //Cuando se sale de una vista
         mViewSwitcher.setOutAnimation(getActivity(), android.R.anim.fade_out);
 
+        //Vamos a configurar el RecyclerView
+        mList = (RecyclerView) root.findViewById(android.R.id.list);
+        //Le decimos al RecyclerView como quiero que te muestres y para ello utilizo el setLayoutManager
+        //indicando como quiero mostrar cada uno de los elementos del Recycler (en este caso como una tabla (LinearLayoutManager))
+        //Existe tambien el GridLayoutManager que muestra los elementos como una parrilla.
+        mList.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        //Parrilla
+        //mList.setLayoutManager(new GridLayoutManager(getActivity(),2));
+
+        //Ahora le indicamos como se animan. Podemos crear nuestrr¡as propias animaciones o utilizar
+        //las que vienen por defecto en el sistema
+        mList.setItemAnimator(new DefaultItemAnimator());
+
+        //Por último indicamos el adaptador (Le paso una lista vacia)
+        mList.setAdapter(new ForcastRecyclerViewAdapter(new LinkedList<Forecast>(), getActivity()));
+
+
+
         //Con los argumentos que se recuperan configuro la vista (sólo paso nombre de la ciudad
         //Bundle arguments = getArguments();
         //String cityName= arguments.getString(ARG_CITY_NAME);
@@ -120,8 +150,10 @@ public class FragmentForecast extends Fragment {
         //showCelsius = true;
 
         //Recuperamos los valores almacenados
-        showCelsius = PreferenceManager.getDefaultSharedPreferences(getActivity()).
+        //Lo llevamos al ForcastRecyclerViewAdapter
+        /*showCelsius = PreferenceManager.getDefaultSharedPreferences(getActivity()).
                 getBoolean(PREFERENCE_UNITS, true); //Se asigna true como valor por defecto si inicialmente no tienen valor
+        */
 
 
         //Creo el modelo
@@ -269,55 +301,71 @@ public class FragmentForecast extends Fragment {
         }
 
         //mMax_temp.setText(String.valueOf(forecast.getMaxTemp()));
-        mMax_temp.setText(String.format("Temperatura máxima: %.2f", maxTemp));
-        mMin_temp.setText(String.format("Temperatura mínima: %.2f", minTemp));
-        mHumidity.setText(String.format("Humedad: %.2f", forecast.getHumidity()));
-        mDescription.setText(forecast.getDescription());
+        //mMax_temp.setText(String.format("Temperatura máxima: %.2f", maxTemp));
+        //mMin_temp.setText(String.format("Temperatura mínima: %.2f", minTemp));
+        //mHumidity.setText(String.format("Humedad: %.2f", forecast.getHumidity()));
+        //mDescription.setText(forecast.getDescription());
+
         //Para el icono utilizamos un método que nos devuelve un recurso
-        mForecast_image.setImageResource(forecast.getIcon());
+        //mForecast_image.setImageResource(forecast.getIcon());
 
 
     }
 
     public void updateCityInfo (){
 
-        Forecast forecast = mCity.getForecast();
 
-        //Si en el modelo me llega una ciudad sin Forecast entonces me lo bajo del servicio del tiempo
-        //Pero si tiene Forecast sigo haciendo lo mismo que antes
-
-        if (forecast == null){
-
+        //Comprobamos si tenemos datos o hay que bajarselos
+        if (mCity.getForecast() == null){
             downloadWheater();
+        }else{
 
-        }else {
-
-            //Muestro en la vista contenedora ViewSwitcher la pantalla del tiempo
+            //Muestra la lista
             mViewSwitcher.setDisplayedChild(FORECAST_VIEW_INDEX);
 
-            //Actualizamos el nombre de la ciudad
-            mCityName.setText(mCity.getnName());
-
-            //Muestro en la interfaz mi modelo
-            float maxTemp = forecast.getMaxTemp();
-            float minTemp = forecast.getMinTemp();
-
-            Log.v("boolean", String.valueOf(showCelsius));
-
-            if (showCelsius != true) {
-
-                maxTemp = atFarnheid(maxTemp);
-                minTemp = atFarnheid(minTemp);
-            }
-
-            //mMax_temp.setText(String.valueOf(forecast.getMaxTemp()));
-            mMax_temp.setText(String.format("Temperatura máxima: %.2f", maxTemp));
-            mMin_temp.setText(String.format("Temperatura mínima: %.2f", minTemp));
-            mHumidity.setText(String.format("Humedad: %.2f", forecast.getHumidity()));
-            mDescription.setText(forecast.getDescription());
-            //Para el icono utilizamos un método que nos devuelve un recurso
-            mForecast_image.setImageResource(forecast.getIcon());
+            //Tenemos los datos los mostramos en la lista
+            mList.setAdapter(new ForcastRecyclerViewAdapter(mCity.getForecast(),getActivity()));
         }
+
+
+
+//        Forecast forecast = mCity.getForecast();
+//
+//        //Si en el modelo me llega una ciudad sin Forecast entonces me lo bajo del servicio del tiempo
+//        //Pero si tiene Forecast sigo haciendo lo mismo que antes
+//
+//        if (forecast == null){
+//
+//            downloadWheater();
+//
+//        }else {
+//
+//            //Muestro en la vista contenedora ViewSwitcher la pantalla del tiempo
+//            mViewSwitcher.setDisplayedChild(FORECAST_VIEW_INDEX);
+//
+//            //Actualizamos el nombre de la ciudad
+//            mCityName.setText(mCity.getnName());
+//
+//            //Muestro en la interfaz mi modelo
+//            float maxTemp = forecast.getMaxTemp();
+//            float minTemp = forecast.getMinTemp();
+//
+//            Log.v("boolean", String.valueOf(showCelsius));
+//
+//            if (showCelsius != true) {
+//
+//                maxTemp = atFarnheid(maxTemp);
+//                minTemp = atFarnheid(minTemp);
+//            }
+//
+//            //mMax_temp.setText(String.valueOf(forecast.getMaxTemp()));
+//            mMax_temp.setText(String.format("Temperatura máxima: %.2f", maxTemp));
+//            mMin_temp.setText(String.format("Temperatura mínima: %.2f", minTemp));
+//            mHumidity.setText(String.format("Humedad: %.2f", forecast.getHumidity()));
+//            mDescription.setText(forecast.getDescription());
+//            //Para el icono utilizamos un método que nos devuelve un recurso
+//            mForecast_image.setImageResource(forecast.getIcon());
+//        }
 
 
     }
@@ -334,7 +382,7 @@ public class FragmentForecast extends Fragment {
 
         //Recibe tres tipos para hacerlo genericos (tipo los parametros de entrada (City),tipo del progreso (Integer)
         //y la salida al realizar la operación (Forecast)
-        final AsyncTask<City, Integer, Forecast> weatherDowloader = new AsyncTask<City, Integer, Forecast>() {
+        final AsyncTask<City, Integer, LinkedList<Forecast>> weatherDowloader = new AsyncTask<City, Integer, LinkedList<Forecast>>() {
 
             //Guardo el objeto city como una propiedad
             private City mCity;
@@ -342,7 +390,7 @@ public class FragmentForecast extends Fragment {
             //Es el único método obligatorio que tenemos que implementar
             //Se ejecuta en otro hilo distinto del principal
             @Override
-            protected Forecast doInBackground(City... params) { //Numero indeterminado de City (City... params)
+            protected LinkedList<Forecast> doInBackground(City... params) { //Numero indeterminado de City (City... params)
 
                 //Nos quedamos con la City (0)
                 City city = params[0];
@@ -407,53 +455,68 @@ public class FragmentForecast extends Fragment {
                     //Tengo que buscar acceder al objeto list con la lista de los distintos días
                     JSONArray days = jsonRoot.getJSONArray("list");
 
-                    //Saco el día actual (que es el primero de list)
-                    JSONObject today = days.getJSONObject(0);
+                    //Creamos una lista donde guardar los distintos forecast
+                    LinkedList<Forecast> forecasts = new LinkedList<>();
 
-                    //Obtengo los datos de ese today
-                    float max = (float) today.getJSONObject("temp").getDouble("max");
-                    float min = (float) today.getJSONObject("temp").getDouble("min");
-                    float humidity = (float) today.getDouble("humidity");
-                    String description = today.getJSONArray("weather").getJSONObject(0).getString("description");
-                    String iconString = today.getJSONArray("weather").getJSONObject(0).getString("icon");
+                    for (int i = 0; i < days.length(); i++){
 
-                    //Quitamos el último caracter del iconString
-                    iconString = iconString.substring(0,iconString.length()-2);
+                        //Saco el día actual (que es el primero de list)
+                        //JSONObject currentDay = days.getJSONObject(0);
 
-                    //Valor por defecto a icon
-                    int icon = R.drawable.ico_01;
+                        //Saco todos los días que me devuelve el servicio
+                        JSONObject currentDay = days.getJSONObject(i);
 
-                    //Asignamos valor a icon en funcion de lo que me devuelva iconString leido del JSON
-                    if (iconString.equals("01")){
-                        icon = R.drawable.ico_01;
-                    }else if (iconString.equals("02")){
-                        icon = R.drawable.ico_02;
-                    }else if (iconString.equals("03")) {
-                        icon = R.drawable.ico_03;
-                    }else if (iconString.equals("04")) {
-                        icon = R.drawable.ico_04;
-                    }else if (iconString.equals("09")){
-                        icon = R.drawable.ico_09;
-                    }else if (iconString.equals("10")){
-                        icon = R.drawable.ico_10;
-                    }else if (iconString.equals("11")){
-                        icon = R.drawable.ico_11;
-                    }else if (iconString.equals("13")){
-                        icon = R.drawable.ico_13;
-                    }else if (iconString.equals("50")) {
-                        icon = R.drawable.ico_50;
+                        //Obtengo los datos de ese currentDay
+                        float max = (float) currentDay.getJSONObject("temp").getDouble("max");
+                        float min = (float) currentDay.getJSONObject("temp").getDouble("min");
+                        float humidity = (float) currentDay.getDouble("humidity");
+                        String description = currentDay.getJSONArray("weather").getJSONObject(0).getString("description");
+                        String iconString = currentDay.getJSONArray("weather").getJSONObject(0).getString("icon");
+
+                        //Quitamos el último caracter del iconString
+                        iconString = iconString.substring(0, iconString.length() - 2);
+
+                        //Valor por defecto a icon
+                        int icon = R.drawable.ico_01;
+
+                        //Asignamos valor a icon en funcion de lo que me devuelva iconString leido del JSON
+                        if (iconString.equals("01")) {
+                            icon = R.drawable.ico_01;
+                        } else if (iconString.equals("02")) {
+                            icon = R.drawable.ico_02;
+                        } else if (iconString.equals("03")) {
+                            icon = R.drawable.ico_03;
+                        } else if (iconString.equals("04")) {
+                            icon = R.drawable.ico_04;
+                        } else if (iconString.equals("09")) {
+                            icon = R.drawable.ico_09;
+                        } else if (iconString.equals("10")) {
+                            icon = R.drawable.ico_10;
+                        } else if (iconString.equals("11")) {
+                            icon = R.drawable.ico_11;
+                        } else if (iconString.equals("13")) {
+                            icon = R.drawable.ico_13;
+                        } else if (iconString.equals("50")) {
+                            icon = R.drawable.ico_50;
+                        }
+
+                        //Simulamos una carga de 5 segundos
+                        //Thread.sleep(5000);
+
+                        //Creamos nuestro objeto forecast
+                        //Forecast forecast = new Forecast(max,min,humidity,description,icon);
+                        //mCity.setForecast(forecast);
+
+                        //Creamos el objeto forecast y lo guuardamos en la lista
+                        forecasts.add(new Forecast(max,min,humidity,description,icon));
+
                     }
-
-                    //Simulamos una carga de 5 segundos
-                    Thread.sleep(5000);
-
-                    //Creamos nuestro objeto forecast
-                    //Forecast forecast = new Forecast(max,min,humidity,description,icon);
-                    //mCity.setForecast(forecast);
-
                     //Retornamos el objeto forecast
                     //Si se comenta podemos ver como funciona en el onPostExecute el AlertDialog
-                    return new Forecast(max,min,humidity,description,icon);
+                    //return new Forecast(max,min,humidity,description,icon);
+
+                    //Retornamos la lista de forecast
+                    return forecasts;
 
                     //Pedimos que de nuevo se actualice la interfaz
                     //updateCityInfo();
@@ -488,7 +551,7 @@ public class FragmentForecast extends Fragment {
             }
 
             @Override
-            protected void onPostExecute(Forecast forecast) {
+            protected void onPostExecute(LinkedList<Forecast> forecast) {
                 super.onPostExecute(forecast);
 
                 if (forecast != null) {
@@ -539,6 +602,7 @@ public class FragmentForecast extends Fragment {
         weatherDowloader.execute(mCity);
     }
 
+    //Me lo llevo tambien al ForcastRecyclerViewAdaoter
     public static float atFarnheid (Float celsius){
 
         return (celsius * 1.8f) + 32;

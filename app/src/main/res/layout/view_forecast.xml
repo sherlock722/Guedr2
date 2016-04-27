@@ -1,33 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
 
-<ViewSwitcher
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/view_switcher"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.fjc.guedr2.ForecastActivity">
-
-    <ProgressBar
-        android:id="@+id/progress"
+    <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminate="true"
         android:layout_margin="@dimen/activity_horizontal_margin"
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal"/>
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@android:id/list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-    </android.support.v7.widget.RecyclerView>
-
-    <!--android.support.v7.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         app:cardCornerRadius="10dp"
         app:cardElevation ="10dp">
 
@@ -37,14 +17,14 @@
             android:padding="@dimen/activity_horizontal_margin">
 
 
-            <TextView
+            <!--TextView
                 android:id="@+id/city"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:text="@string/city_example"
                 android:layout_marginBottom="@dimen/tittle_margin_button"
-                android:textAppearance="?android:attr/textAppearanceLarge"/>
+                android:textAppearance="?android:attr/textAppearanceLarge"/-->
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -89,6 +69,6 @@
                 android:id="@+id/description_forecast"/>
 
         </RelativeLayout>
-    </android.support.v7.widget.CardView-->
+    </android.support.v7.widget.CardView>
 
-</ViewSwitcher>
+</FrameLayout>

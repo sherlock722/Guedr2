@@ -1,6 +1,7 @@
 package com.fjc.guedr2.model;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 
 /**
  * Created by javier on 15/4/16.
@@ -8,9 +9,9 @@ import java.io.Serializable;
 public class City implements Serializable{
 
     private String nName;
-    private Forecast mForecast;
+    private LinkedList<Forecast> mForecast;
 
-    public City(String nName, Forecast forecast) {
+    public City(String nName, LinkedList<Forecast> forecast) {
         this.nName = nName;
         mForecast = forecast;
     }
@@ -29,11 +30,11 @@ public class City implements Serializable{
         this.nName = nName;
     }
 
-    public Forecast getForecast() {
+    public LinkedList<Forecast> getForecast() {
         return mForecast;
     }
 
-    public void setForecast(Forecast forecast) {
+    public void setForecast(LinkedList<Forecast> forecast) {
         mForecast = forecast;
     }
 

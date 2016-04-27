@@ -14,7 +14,7 @@ public class Cities {
 
     public Cities() {
         mCities = new LinkedList<City>();
-        mCities.add(new City("Madrid", new Forecast(29,10,26,"Soleado con nubes", R.drawable.sun_cloud)));
+        //mCities.add(new City("Madrid", new Forecast(29,10,26,"Soleado con nubes", R.drawable.sun_cloud)));
         //mCities.add(new City("Jaen", new Forecast(38,20,10,"Soleado", R.drawable.ico_01)));
         //mCities.add(new City("Quito", new Forecast(25,12,10,"Arcoiris", R.drawable.ico_10)));
 
